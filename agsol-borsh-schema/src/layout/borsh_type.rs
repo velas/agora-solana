@@ -79,7 +79,16 @@ impl FromStr for BorshType {
                     let value = BorshType::from_str(value_str)?;
                     Ok(BorshType::Map(Box::new(key), Box::new(value)))
                 } else {
-                    Ok(BorshType::Custom(input.to_owned()))
+                    Ok(match input.as_str() {
+                        "H128" => BorshType::FixedBytes(16),
+                        "H160" | "Address" => BorshType::FixedBytes(20),
+                        "H256" => BorshType::FixedBytes(32),
+                        "H512" => BorshType::FixedBytes(64),
+                        "U128" => BorshType::FixedBytes(16),
+                        "U256" | "Gas" => BorshType::FixedBytes(32),
+                        "U512" => BorshType::FixedBytes(64),
+                        _ => BorshType::Custom(input.to_owned()),
+                    })
                 }
             }
         }
@@ -125,9 +134,12 @@ impl BorshType {
             Self::Bool => "boolean".to_owned(),
             Self::String => "string".to_owned(),
             Self::Pubkey => "PublicKey".to_owned(),
-            Self::Vec(inner) => format!("{}[]", inner.to_class_type()),
+            Self::Vec(inner) => match inner.as_ref() {
+                BorshType::U8 => "Uint8Array".to_owned(),
+                _ => format!("{}[]", inner.to_class_type()),
+            },
             Self::FixedArray(inner, _len) => format!("{}[]", inner.to_class_type()),
-            Self::FixedBytes(len) => format!("[{}]", len),
+            Self::FixedBytes(_len) => "Uint8Array".to_owned(),
             Self::Option(inner) => {
                 format!("{} | null", inner.to_class_type())
             }
