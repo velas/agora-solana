@@ -113,13 +113,18 @@ pub fn generate_output(
     );
 
     let imports = String::from(
-        r#"import { PublicKey } from "@solana/web3.js";
-import BN from "bn.js";
-import Enum from "./extensions/enum";
-import Struct from "./extensions/struct";
-import { borshPublicKey } from "./extensions/publicKey";
+        r#"/* eslint-disable functional/no-this-expression */
+/* eslint-disable functional/prefer-readonly-type */
+/* eslint-disable functional/no-class */
+import { H160, H256, U256 } from '@polkadot/types';
+import { PublicKey, SystemProgram, TransactionInstruction } from '@velas/web3';
+import BN from 'bn.js';
 
-borshPublicKey();
+import { Assignable, Enum, SCHEMA } from './solana-borsh';
+
+export const EVM_PROGRAM_ID = new PublicKey(
+  'EVM1111111111111111111111111111111111111111'
+);
 
 "#,
     );

@@ -39,6 +39,10 @@ impl Layout {
 
     /// Converts the layout into a TypeScript class.
     pub fn to_ts_class(&self) -> String {
+        let kind = match self.kind {
+            Kind::Enum => "Enum",
+            Kind::Struct => "Assignable",
+        };
         let class_fields = self
             .fields
             .iter()
@@ -46,11 +50,11 @@ impl Layout {
             .map(|field| String::from("\n    ") + &field.to_class_field() + ";")
             .collect::<String>();
         format!(
-            r#"export class {} extends {:?} {{{}
+            r#"export class {} extends {} {{{}
 }};
 
 "#,
-            self.name, self.kind, class_fields
+            self.name, kind, class_fields
         )
     }
 
@@ -64,7 +68,7 @@ impl Layout {
             .fields
             .iter()
             .filter(|field| !field.should_skip())
-            .map(|field| String::from("\n\t\t\t") + &field.to_borsh_schema() + ",")
+            .map(|field| String::from("\n\t\t\t\t\t") + &field.to_borsh_schema() + ",")
             .collect::<String>();
         // NOTE don't change this string (tabs are included in the output string)
         format!(
